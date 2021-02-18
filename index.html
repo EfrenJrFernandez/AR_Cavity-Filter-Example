@@ -6,12 +6,23 @@
         <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
         <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
         <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
+        <script src="https://code.highcharts.com/highcharts.src.js"></script>
         
         <meta name="viewport" content="width=device-width, initial-scale=1">
         
     </head>
     <body>
+        <button id="menu" onclick="collapse()" style='text-align: center; width: 125px; border: none; font-size:20px; position: fixed; top: 20px; right: 35px; text-align: right; z-index: 2;'>Show Graph</button>
         
+        <div class='collapsible' style='background-color: white; width:100%; height:100%'>
+            <div style='position: fixed; top: 70px; right: 35px; text-align: right; z-index: 3;'>
+                <span id="cText" style="color:black">50</span><span>  </span><input type=range id="capacitance" min=0 max=100 step=1 value=50 />
+            </div>
+            <div align="center" style='position: fixed; top: 95px; right: 35px; text-align: right; z-index: 2;'>
+                <span id="iText" style="color:black">50</span><span>  </span><input type=range id="inductance" min=0 max=100 step=1 value=50 />
+            </div>
+            <div id = "graph" style='position:fixed; top:0px; height:95%; width:80%; padding-top:20px; padding-left:20px; z-index: 1'></div>
+        </div>
         <a-scene
             vr-mode-ui="enabled: false;"
             loading-screen="enabled: false;"
@@ -54,6 +65,54 @@
         
     <!-- Allows us to identify the different meshes -->
         <script type="text/javascript">
+            var capacitance = 50;
+            var inductance = 50;
+            var chart;
+            document.getElementsByClassName("collapsible")[0].style.display = "none";
+         
+            function updateCap(){
+                capacitance = parseInt(document.getElementById('capacitance').value);
+                document.getElementById('cText').innerHTML = capacitance;
+                chart.series[0].setData([capacitance],true);
+            }
+            function updateInd(){
+                inductance = parseInt(document.getElementById('inductance').value);
+                document.getElementById('iText').innerHTML = inductance;
+                chart.series[1].setData([inductance],true);
+            }
+            function collapse(){
+                if(document.getElementById('menu').innerHTML=="Show Graph"){
+                    document.getElementById('menu').innerHTML="Hide Graph";
+                    document.getElementById('menu').style.paddingRight = "10px";
+                    document.getElementsByClassName("collapsible")[0].style.display = "block";
+                }
+                else{
+                    document.getElementById('menu').innerHTML="Show Graph";
+                    document.getElementById('menu').style.paddingRight = "6px";
+                    document.getElementsByClassName("collapsible")[0].style.display = "none";
+                }
+            }
+        
+            document.getElementById("capacitance").addEventListener("input",updateCap);
+            document.getElementById("inductance").addEventListener("input",updateInd);
+            document.addEventListener('DOMContentLoaded', ()=> {
+                chart = new Highcharts.chart('graph', {
+                    title:{
+                        text: 'Cavity Filter'
+                    },
+                    series:[
+                        {
+                            name: 'capacitance',
+                            data: [capacitance]
+                        },
+                        {
+                            name: 'inductance',
+                            data: [inductance]
+                        }
+                    ]
+                });
+            });
+            
             gltf = document.querySelector('#bowser-model');
             var scene = document.querySelector('a-scene');
             scene.addEventListener('loaded', function (e) {
