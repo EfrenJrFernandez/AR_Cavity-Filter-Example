@@ -15,13 +15,15 @@
         <button id="menu" onclick="collapse()" style='text-align: center; width: 125px; border: none; font-size:20px; position: fixed; top: 20px; right: 35px; text-align: right; z-index: 2;'>Show Graph</button>
         
         <div class='collapsible' style='background-color: white; width:100%; height:100%'>
-            <div style='position: fixed; top: 70px; right: 35px; text-align: right; z-index: 3;'>
-                <span id="cText" style="color:black">50</span><span>  </span><input type=range id="capacitance" min=0 max=100 step=1 value=50 />
+            <div style='position: fixed; top: 70px; right: 35px; text-align: right'>
+                <span>Capacitance</span><br>
+                <span id="cText">50 F  </span><input type=range id="capacitance" min=0 max=100 step=1 value=50 />
             </div>
-            <div align="center" style='position: fixed; top: 95px; right: 35px; text-align: right; z-index: 2;'>
-                <span id="iText" style="color:black">50</span><span>  </span><input type=range id="inductance" min=0 max=100 step=1 value=50 />
+            <div style='position: fixed; top: 120px; right: 35px; text-align: right'>
+                <span>Inductance</span><br>
+                <span id="iText">50 H  </span><input type=range id="inductance" min=0 max=100 step=1 value=50 />
             </div>
-            <div id = "graph" style='position:fixed; top:0px; height:95%; width:80%; padding-top:20px; padding-left:20px; z-index: 1'></div>
+            <div id = "graph" style='position:fixed; top:0px; height:95%; width:80%; padding-top:20px; padding-left:20px'></div>
         </div>
         <a-scene
             vr-mode-ui="enabled: false;"
@@ -72,12 +74,12 @@
          
             function updateCap(){
                 capacitance = parseInt(document.getElementById('capacitance').value);
-                document.getElementById('cText').innerHTML = capacitance;
+                document.getElementById('cText').innerHTML = capacitance+" F  ";
                 chart.series[0].setData([capacitance],true);
             }
             function updateInd(){
                 inductance = parseInt(document.getElementById('inductance').value);
-                document.getElementById('iText').innerHTML = inductance;
+                document.getElementById('iText').innerHTML = inductance+" H  ";
                 chart.series[1].setData([inductance],true);
             }
             function collapse(){
