@@ -16,12 +16,12 @@
         
         <div class='collapsible' style='background-color: white; width:100%; height:100%'>
             <div style='position: fixed; top: 70px; right: 35px; text-align: right'>
-                <span>Capacitance</span><br>
-                <span id="cText">50 F  </span><input type=range id="capacitance" min=0 max=100 step=1 value=50 />
+                <span>Clp</span><br>
+                <span id="clpText">150 nF  </span><input type=range id="clp" min=50 max=150 step=1 value=150 />
             </div>
             <div style='position: fixed; top: 120px; right: 35px; text-align: right'>
-                <span>Inductance</span><br>
-                <span id="iText">50 H  </span><input type=range id="inductance" min=0 max=100 step=1 value=50 />
+                <span>Chp</span><br>
+                <span id="chpText">201 nF  </span><input type=range id="chp" min=199 max=599 step=1 value=201 />
             </div>
             <div id = "graph" style='position:fixed; top:0px; height:95%; width:80%; padding-top:20px; padding-left:20px'></div>
         </div>
@@ -67,21 +67,11 @@
         
     <!-- Allows us to identify the different meshes -->
         <script type="text/javascript">
-            var capacitance = 50;
-            var inductance = 50;
+            var clp = 150;
+            var chp = 201;
             var chart;
             document.getElementsByClassName("collapsible")[0].style.display = "none";
-         
-            function updateCap(){
-                capacitance = parseInt(document.getElementById('capacitance').value);
-                document.getElementById('cText').innerHTML = capacitance+" F  ";
-                chart.series[0].setData([capacitance],true);
-            }
-            function updateInd(){
-                inductance = parseInt(document.getElementById('inductance').value);
-                document.getElementById('iText').innerHTML = inductance+" H  ";
-                chart.series[1].setData([inductance],true);
-            }
+            
             function collapse(){
                 if(document.getElementById('menu').innerHTML=="Show Graph"){
                     document.getElementById('menu').innerHTML="Hide Graph";
@@ -94,22 +84,77 @@
                     document.getElementsByClassName("collapsible")[0].style.display = "none";
                 }
             }
+ 
+            function calcGain(a,f,fc){
+                return a*Math.pow(f-fc,2)-100;
+            }
+            function setChart(){
+                fl=1/(clp*16000*Math.PI*Math.pow(10,-9));
+                fh=1/(chp*4000*Math.PI*Math.pow(10,-9));
+                fc=Math.sqrt(fl*fh);
+                a=100/Math.pow(fl-fc,2);
+                
+                interval = (fh-fl)/6;
+                
+                
+                offfreq=fl+interval*5
+                
+                console.log("\n");
+                console.log("frequency: " + offfreq);
+                console.log("fl: " + fl);
+                console.log("fh: " + fh);
+                console.log("fc: " + fc);
+                console.log("a: " + a);
+                console.log("gain: " + calcGain(a,fl+interval*5,fc));
+                
+                /*chart.series[0].setData([[fl-interval,0],[fl,0],[fc,-100],[fh,0],[fh+interval,0]],true);*/
         
-            document.getElementById("capacitance").addEventListener("input",updateCap);
-            document.getElementById("inductance").addEventListener("input",updateInd);
+                chart.series[0].setData([[fl-interval,0],[fl,-3],[fl+interval,calcGain(a,fl+interval,fc)],[fl+interval*2,calcGain(a,fl+interval*2,fc)],[fl+interval*3,calcGain(a,fl+interval*3,fc)],[fl+interval*4,calcGain(a,fl+interval*4,fc)],[fl+interval*5,calcGain(a,fl+interval*5,fc)],[fh,-3],[fh+interval,0]],true);
+            }
+         /*
+            function update(){
+                if(clp*4<=chp){
+                    chp = 4*clp-1
+                    document.getElementById('chp').value = chp;
+                }
+                clp = parseInt(document.getElementById('clp').value);
+                document.getElementById('clpText').innerHTML = clp+" nF  ";
+                chp = parseInt(document.getElementById('chp').value);
+                document.getElementById('chpText').innerHTML = chp+" nF  ";
+                setChart();
+            }*/
+            
+            function update(){
+
+                clp = parseInt(document.getElementById('clp').value);
+                chp = parseInt(document.getElementById('chp').value);
+                
+                if(clp*4<=chp){
+                    chp = 4*clp-1
+                    document.getElementById('chp').value = chp;
+                }
+                
+                document.getElementById('clpText').innerHTML = clp+" nF  ";
+                document.getElementById('chpText').innerHTML = chp+" nF  ";
+                setChart();
+                
+            }
+            
+        
+            document.getElementById("clp").addEventListener("input",update);
+            document.getElementById("chp").addEventListener("input",update);
             document.addEventListener('DOMContentLoaded', ()=> {
                 chart = new Highcharts.chart('graph', {
+                    chart:{
+                        type:'spline'
+                    },
                     title:{
                         text: 'Cavity Filter'
                     },
                     series:[
                         {
-                            name: 'capacitance',
-                            data: [capacitance]
-                        },
-                        {
-                            name: 'inductance',
-                            data: [inductance]
+                            name: 'gain',
+                            data: []
                         }
                     ]
                 });
