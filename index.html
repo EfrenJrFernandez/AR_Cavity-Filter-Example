@@ -122,10 +122,7 @@
                 chp = parseInt(document.getElementById('chp').value);
                 
                 if(clp*4<=chp){
-                    clp = Math.ceil(chp/4);
-                    if(clp*4==chp){
-                       clp=clp+1;
-                       }
+                    clp = Math.floor(chp/4)+1;
                     document.getElementById('clp').value = clp;
                 }
                 
